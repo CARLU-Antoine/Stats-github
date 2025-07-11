@@ -12,7 +12,6 @@
 .dashboard-row {
   display: flex;
   gap: 25px;
-  margin-bottom: 30px;
   flex-wrap: wrap;
 }
 
@@ -35,8 +34,6 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 25px;
   padding: 0;
-  margin-bottom: 30px;
-  min-height:52vh;
 }
 
 .dashboard-cards-stats p {
@@ -74,7 +71,7 @@
 
 .dashboard-cards-stats h2 {
   font-size: 1.1em;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   font-weight: 500;
   opacity: 0.9;
   text-transform: uppercase;
