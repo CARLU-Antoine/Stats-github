@@ -2,7 +2,7 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-function MyChart() {
+function MyChartBar() {
   const options = {
     title: {
       text: 'Statistiques GitHub',
@@ -11,7 +11,7 @@ function MyChart() {
       }
     },
     chart: {
-      height: 350,
+      height: 250,
       type: 'column',
       backgroundColor: 'transparent',
     },
@@ -81,4 +81,4 @@ function MyChart() {
   );
 }
 
-export default MyChart;
+export default MyChartBar;

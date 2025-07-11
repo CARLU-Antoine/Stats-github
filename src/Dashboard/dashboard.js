@@ -1,5 +1,6 @@
 import './dashboard.css'; 
-import MyChart from './chart';
+import MyChartBar from './MyChartBar';
+import MyChartCamembert from './MyChartCamembert';
 
 function Dashboard() {
   return (
@@ -32,10 +33,26 @@ function Dashboard() {
             <div className='dashboard-component'>
                 <h1>Statistiques en barre des projets GitHub</h1>
                 <div className='dashboard-bar'>
-                    <MyChart />
+                    <MyChartBar />
                 </div>
             </div>
         </div>
+         <div className="dashboard-row">
+            <div className='dashboard-component'>
+                <h1>Top 3 des projets GitHub les plus visités</h1>
+                <div className='dashboard-camembert'>
+                    <MyChartCamembert />
+                </div>
+            </div>
+            <div className='dashboard-component'>
+                <h1>Top 3 des projets GitHub les plus clonés</h1>
+                <div className='dashboard-camembert'>
+                    <MyChartCamembert />
+                </div>
+            </div>
+
+        </div>
+        
     </div>
   );
 }
