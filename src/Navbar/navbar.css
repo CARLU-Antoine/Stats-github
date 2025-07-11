@@ -1,53 +1,82 @@
 .navbar {
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 10px;
+  background-color: black;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+  min-height: 100vh;
+  width: 250px;
+  box-sizing: border-box;
 }
 
 .navbar-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  width: 100%;
 }
 
 .navbar-title {
-    font-size: 24px;
-    color: white;
-    margin: 0; 
+  font-size: 24px;
+  color: white;
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
 }
 
 #btn-logo-home {
-    width: 10vh;
-    height: 10vh;
-    display: block;
-    margin: 15px auto 0 auto;
-    cursor: pointer;
+  width: 80px;
+  height: 80px;
+  display: block;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+#btn-logo-home:hover {
+  transform: scale(1.1);
 }
 
 .navbar-links {
-    display: flex;
-    flex-direction: column;
-    list-style: none;
-    padding: 0;
-    margin: 50px;
-    display: flex;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 15px;
+  width: 100%;
+  flex-grow: 1;
 }
 
 .navbar-links a {
-    text-decoration: none;
-    color: inherit;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  width: 100%;
 }
 
 .navbar-item {
-    background-color: #282c34;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 10px 0 0 10px;
-    cursor: pointer;
+  background-color: #282c34;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  font-weight: 500;
 }
+
+.navbar-item:hover {
+  background-color: #3a3f47;
+  border-left-color: #61dafb;
+}
+
+.navbar-item.active {
+  background-color: #61dafb;
+  color: black;
+  border-left-color: #21a1c4;
+}
+
