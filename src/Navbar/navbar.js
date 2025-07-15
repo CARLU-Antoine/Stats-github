@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import './navbar.css'; 
+import { NavLink } from 'react-router-dom';
+import './navbar.css';
 
 function Navbar() {
   return (
@@ -28,8 +28,26 @@ function Navbar() {
       </div>
 
       <ul className="navbar-links">
-        <Link to="/login"><li className="navbar-item">Se connecter</li></Link>
-        <Link to="/dashboard"><li className="navbar-item">Dashboard</li></Link>
+        <li>
+          <NavLink
+            to="/login"
+            className={({ isActive }) =>
+              isActive ? 'navbar-item actif' : 'navbar-item'
+            }
+          >
+            Se connecter
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              isActive ? 'navbar-item actif' : 'navbar-item'
+            }
+          >
+            Dashboard
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );
