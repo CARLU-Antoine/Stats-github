@@ -1,0 +1,7 @@
+connect_github:
+    path: /api/connect/github
+    controller: App\Controller\GithubController::connect
+
+connect_github_check:
+    path: /api/connect/github/check
+    controller: App\Controller\GithubController::connectCheck
