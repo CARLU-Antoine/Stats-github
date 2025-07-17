@@ -1,0 +1,12 @@
+<h1>Bienvenue {{ username }}</h1>
+
+<h2>Vos dépôts GitHub :</h2>
+<ul>
+    {% for repo in repos %}
+        <li>
+            <strong>{{ repo.name }}</strong> - ⭐ {{ repo.stargazers_count }}
+        </li>
+    {% else %}
+        <li>Aucun dépôt trouvé.</li>
+    {% endfor %}
+</ul>
