@@ -1,7 +1,26 @@
 import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import './navbar.css';
 
 function Navbar() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const storedUsername = localStorage.getItem('username');
+    setIsAuthenticated(!!token);
+    setUsername(storedUsername || '');
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('username');
+    setIsAuthenticated(false);
+    setUsername('');
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-header">
@@ -11,6 +30,8 @@ function Navbar() {
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 16 16"
           fill="white"
+          width="32"
+          height="32"
         >
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 
             2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 
@@ -28,26 +49,64 @@ function Navbar() {
       </div>
 
       <ul className="navbar-links">
-        <li>
-          <NavLink
-            to="/login"
-            className={({ isActive }) =>
-              isActive ? 'navbar-item actif' : 'navbar-item'
-            }
-          >
-            Se connecter
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              isActive ? 'navbar-item actif' : 'navbar-item'
-            }
-          >
-            Dashboard
-          </NavLink>
-        </li>
+        {isAuthenticated ? (
+          <>
+            <li className="navbar-item">
+              Bienvenue, {username}
+            </li>
+            <li onClick={handleLogout}>
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  isActive ? 'navbar-item actif' : 'navbar-item'
+                }
+              >
+                Déconnexion
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/liste-projets"
+                className={({ isActive }) =>
+                  isActive ? 'navbar-item actif' : 'navbar-item'
+                }
+              >
+                Projets
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/dashboard"
+                className={({ isActive }) =>
+                  isActive ? 'navbar-item actif' : 'navbar-item'
+                }
+              >
+                Dashboard
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/filtrer-projets"
+                className={({ isActive }) =>
+                  isActive ? 'navbar-item actif' : 'navbar-item'
+                }
+              >
+                Filtrer par projet
+              </NavLink>
+            </li>
+          </>
+        ) : (
+          <li>
+            <NavLink
+              to="/login"
+              className={({ isActive }) =>
+                isActive ? 'navbar-item actif' : 'navbar-item'
+              }
+            >
+              Se connecter
+            </NavLink>
+          </li>
+        )}
       </ul>
     </nav>
   );

@@ -51,11 +51,27 @@ class GithubController extends AbstractController
             ],
         ]);
 
-        $repos = $response->toArray();
+        $rawRepos = $response->toArray();
 
-        return $this->render('user/github_stats.html.twig', [
+        $filteredRepos = array_map(function ($repo) {
+            return [
+                'name'        => $repo['name'],
+                'full_name'   => $repo['full_name'],
+                'html_url'    => $repo['html_url'],
+                'description' => $repo['description'],
+                'language'    => $repo['language'],
+                'forks_count' => $repo['forks_count'],
+                'stargazers_count' => $repo['stargazers_count'],
+                'watchers_count'   => $repo['watchers_count'],
+                'created_at'  => $repo['created_at'],
+                'updated_at'  => $repo['updated_at'],
+                'private'     => $repo['private'],
+            ];
+        }, $rawRepos);
+
+        return $this->json([
             'username' => $githubUsername,
-            'repos'    => $repos,
+            'repositories' => $filteredRepos,
         ]);
     }
 }

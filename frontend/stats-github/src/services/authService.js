@@ -9,10 +9,15 @@ export async function connexion(username, password) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Erreur lors de la connexion');
+    throw new Error(errorData.error || 'Erreur lors de la connexion');
   }
 
-  return await response.json();
+  const data = await response.json();
+
+  localStorage.setItem('username', username);
+  localStorage.setItem('access_token', data.access_token);
+    
+  return data;
 }
 
 export async function creerCompte(username, password) {
