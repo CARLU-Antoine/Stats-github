@@ -1,10 +1,35 @@
 import React, { useState } from 'react';
+import { connexion, creerCompte } from '../services/authService';
 import './login.css';
 import fondGithub from '../asset/fond-github.png';
 import LoginTabs from './login-tabs';
 
 function Login() {
   const [activeTab, setActiveTab] = useState('login');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (activeTab === 'login') {
+        const data = await connexion(username, password);
+        console.log('Connecté!', data);
+      } else {
+        const data = await creerCompte(username, password);
+        console.log('Compte créé!', data);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="login-container">
@@ -12,49 +37,46 @@ function Login() {
         <LoginTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <div className="container-login-form">
-          {activeTab === 'login' && (
-            <>
-              <div className="login-header">
-                <h1 className="login-title">Se connecter</h1>
-                <GitHubLogo />
-              </div>
-              <form>
-                <div className="login-input-group">
-                  <label htmlFor="login-username">Nom d'utilisateur</label>
-                  <input type="text" id="login-username" name="username" required />
-                </div>
-                <div className="login-input-group">
-                  <label htmlFor="login-password">Mot de passe</label>
-                  <input type="password" id="login-password" name="password" required />
-                </div>
-                <button type="submit" className="login-button">Se connecter</button>
-              </form>
-            </>
-          )}
+          <div className="login-header">
+            <h1 className="login-title">{activeTab === 'login' ? 'Se connecter' : 'Créer un compte'}</h1>
+            <GitHubLogo />
+          </div>
 
-          {activeTab === 'register' && (
-            <>
-              <div className="login-header">
-                <h1 className="login-title">Créer un compte</h1>
-                <GitHubLogo />
-              </div>
-              <form>
-                <div className="login-input-group">
-                  <label htmlFor="register-username">Nom d'utilisateur</label>
-                  <input type="text" id="register-username" name="username" required />
-                </div>
-                <div className="login-input-group">
-                  <label htmlFor="register-password">Mot de passe</label>
-                  <input type="password" id="register-password" name="password" required />
-                </div>
-                <button type="submit" className="login-button">Créer un compte</button>
-              </form>
-            </>
-          )}
+          <form onSubmit={handleSubmit}>
+            <div className="login-input-group">
+              <label htmlFor={`${activeTab}-username`}>Nom d'utilisateur</label>
+              <input
+                type="text"
+                id={`${activeTab}-username`}
+                name="username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="login-input-group">
+              <label htmlFor={`${activeTab}-password`}>Mot de passe</label>
+              <input
+                type="password"
+                id={`${activeTab}-password`}
+                name="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && <p className="error-message">{error}</p>}
+
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? 'Patientez...' : activeTab === 'login' ? 'Se connecter' : 'Créer un compte'}
+            </button>
+          </form>
         </div>
 
         <p className="login-footer">
-          Pas encore de compte GitHub ?{" "}
+          Pas encore de compte GitHub ?{' '}
           <a
             href="https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home"
             target="_blank"
@@ -72,7 +94,6 @@ function Login() {
   );
 }
 
-// Composant logo GitHub (évite la duplication du SVG)
 function GitHubLogo() {
   return (
     <svg
