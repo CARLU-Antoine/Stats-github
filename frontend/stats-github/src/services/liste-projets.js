@@ -2,15 +2,17 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 
 export async function recupererProjets() {
-  const response = await fetch(`${API_BASE_URL}/connect/github`, {
+  const response = await fetch(`${API_BASE_URL}/github/repos`, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',  // si tu as besoin d’envoyer les cookies de session
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Erreur lors de la récupération de la liste des projets');
+    throw new Error(errorData.error || 'Erreur lors de la récupération des projets GitHub');
   }
 
   return await response.json();

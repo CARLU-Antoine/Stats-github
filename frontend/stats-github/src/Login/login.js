@@ -19,7 +19,9 @@ function Login() {
     try {
       if (activeTab === 'login') {
         const data = await connexion(username, password);
-        window.location.href = '/dashboard';
+
+        window.location.href = 'http://localhost:8000/api/connect/github';
+
       } else {
         const data = await creerCompte(username, password);
         console.log('Compte créé!', data);

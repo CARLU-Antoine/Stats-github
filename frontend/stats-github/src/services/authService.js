@@ -34,3 +34,13 @@ export async function creerCompte(username, password) {
 
   return await response.json();
 }
+
+export async function deconnexionGithub() {
+  fetch('http://localhost:8000/api/github/deconnexion', {
+    method: 'POST',
+    credentials: 'include',
+  })
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(err => console.error(err));
+}
