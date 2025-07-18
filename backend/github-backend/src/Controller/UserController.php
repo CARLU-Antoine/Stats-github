@@ -4,63 +4,78 @@ namespace App\Controller;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use KnpU\OAuth2ClientBundle\Exception\InvalidStateException;
-use League\OAuth2\Client\Provider\GithubResourceOwner;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    public function connect(ClientRegistry $clientRegistry): Response
+    private $em;
+    private $passwordHasher;
+
+    public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher)
     {
-        return $clientRegistry->getClient('github')->redirect([], []);
+        $this->em = $em;
+        $this->passwordHasher = $passwordHasher;
     }
 
-    public function connectCheck(
-        Request $request,
-        ClientRegistry $clientRegistry,
-        EntityManagerInterface $em
-    ): Response {
-        $client = $clientRegistry->getClient('github');
+    #[Route('/api/creer-compte', name: 'user_register', methods: ['POST'])]
+    public function register(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
 
-        try {
-            $accessToken = $client->getAccessToken();
-            /** @var GithubResourceOwner $githubUser */
-            $githubUser = $client->fetchUserFromToken($accessToken);
-        } catch (InvalidStateException $e) {
-            $this->addFlash('error', 'Connexion expirée.');
-            return $this->redirectToRoute('connect_github');
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur : ' . $e->getMessage());
-            return $this->redirectToRoute('connect_github');
+        $username = $data['username'] ?? null;
+        $plainPassword = $data['password'] ?? null;
+
+        if (!$username || !$plainPassword) {
+            return $this->json(['error' => 'Username and password required'], 400);
         }
 
-        $githubId = $githubUser->getId();
-        $username = $githubUser->getNickname();
-        $email = $githubUser->getEmail(); // parfois null selon les autorisations
+        // Vérifier si l'utilisateur existe déjà
+        $existingUser = $this->em->getRepository(User::class)->findOneBy(['username' => $username]);
+        if ($existingUser) {
+            return $this->json(['error' => 'Username already taken'], 400);
+        }
 
-        // Vérifie si l'utilisateur existe déjà
-        $user = $em->getRepository(User::class)->findOneBy(['githubId' => $githubId]);
+        // Créer nouvel utilisateur
+        $user = new User();
+        $user->setUsername($username);
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+        $user->setPassword($hashedPassword);
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return $this->json(['message' => 'User created'], 201);
+    }
+
+    #[Route('/api/connexion', name: 'user_login', methods: ['POST'])]
+    public function login(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $username = $data['username'] ?? null;
+        $plainPassword = $data['password'] ?? null;
+
+        if (!$username || !$plainPassword) {
+            return $this->json(['error' => 'Username and password required'], 400);
+        }
+
+        $user = $this->em->getRepository(User::class)->findOneBy(['username' => $username]);
 
         if (!$user) {
-            // Nouvel utilisateur : on le crée
-            $user = new User();
-            $user->setGithubId($githubId);
-            $user->setUsername($username);
-            $user->setEmail($email);
-
-            $em->persist($user);
-            $em->flush();
-
-            $this->addFlash('success', 'Compte créé pour ' . $username);
-        } else {
-            $this->addFlash('success', 'Bienvenue de retour ' . $username);
+            return $this->json(['error' => 'Invalid credentials'], 401);
         }
 
-        // 🔒 Tu pourrais maintenant te connecter réellement (via authentification manuelle ou LexikJWT, etc.)
+        // Vérifier le mot de passe
+        if (!$this->passwordHasher->isPasswordValid($user, $plainPassword)) {
+            return $this->json(['error' => 'Invalid credentials'], 401);
+        }
 
-        return $this->redirectToRoute('homepage');
+        // Ici tu peux générer un token JWT, session, etc.  
+        // Pour l'exemple simple, on retourne juste un message
+        return $this->json(['message' => 'Login successful']);
     }
 }
