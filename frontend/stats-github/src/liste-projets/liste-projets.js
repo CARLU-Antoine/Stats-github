@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { recupererProjets } from '../services/liste-projets';
+import './liste-projets.css'
 
 function ListeProjets() {
   const [projets, setProjets] = useState([]);
@@ -27,16 +28,20 @@ function ListeProjets() {
   return (
     <div>
       <h1>Liste des projets GitHub</h1>
-      <ul>
+      <div className='cards-projets-container'>
         {projets.map(projet => (
-          <li key={projet.full_name}>
-            <a href={projet.html_url} target="_blank" rel="noopener noreferrer">
-              {projet.name}
-            </a>
+          <div className='card-projet' key={projet.id || projet.name}>
+            <h3>{projet.name}</h3>
+            <button
+              className='btn-link-projet'
+              onClick={() => window.open(projet.html_url, '_blank', 'noopener,noreferrer')}
+            >
+              Voir le projet
+            </button>
             <p>{projet.description || 'Pas de description'}</p>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

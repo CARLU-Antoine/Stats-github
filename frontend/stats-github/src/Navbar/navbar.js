@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { deconnexionGithub } from '../services/authService';
 import './navbar.css';
 
 function Navbar() {
@@ -18,6 +19,7 @@ function Navbar() {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('username');
     setIsAuthenticated(false);
+    deconnexionGithub();
     setUsername('');
   };
 

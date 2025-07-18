@@ -9,69 +9,96 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Attribute\Route;
 
 class GithubController extends AbstractController
 {
+    #[Route('/api/connect/github', name: 'connect_github')]
     public function connect(ClientRegistry $clientRegistry): Response
     {
-        // Redirige vers GitHub pour autorisation OAuth
-        return $clientRegistry->getClient('github')->redirect([], []);
+        // Redirige vers GitHub pour autorisation OAuth avec les bons scopes
+        return $clientRegistry->getClient('github')->redirect(
+            ['user', 'repo'], // Scopes
+            []
+        );
     }
 
+    #[Route('/api/connect/github/check', name: 'connect_github_check')]
     public function connectCheck(
         Request $request,
         ClientRegistry $clientRegistry,
-        HttpClientInterface $httpClient
+        SessionInterface $session
     ): Response {
         $client = $clientRegistry->getClient('github');
 
         try {
-            // Récupère le token d’accès via le code OAuth reçu automatiquement
+            // Récupère le token d’accès via le code OAuth
             $accessToken = $client->getAccessToken();
+
             // Récupère l’utilisateur GitHub
             /** @var GithubResourceOwner $user */
             $user = $client->fetchUserFromToken($accessToken);
-        } catch (InvalidStateException $e) {
-            $this->addFlash('error', 'La connexion a expiré, veuillez réessayer.');
-            return $this->redirectToRoute('connect_github');
-        } catch (\Exception $e) {
-            // Gestion générique des erreurs OAuth
-            $this->addFlash('error', 'Erreur lors de la connexion GitHub : ' . $e->getMessage());
+
+            // Stocke le token GitHub en session
+            $session->set('github_token', $accessToken->getToken());
+            $session->set('github_username', $user->getNickname());
+
+            return $this->redirect('http://localhost:3000/github-success');
+        } catch (InvalidStateException|\Exception $e) {
             return $this->redirectToRoute('connect_github');
         }
+    }
 
-        $token = $accessToken->getToken();
-        $githubUsername = $user->getNickname();
+    #[Route('/api/github/repos', name: 'api_github_repos', methods: ['GET'])]
+    public function getRepositories(HttpClientInterface $httpClient, SessionInterface $session): Response
+    {
+        if (!$session->has('github_token')) {
+            return $this->json(['error' => 'Utilisateur non connecté à GitHub'], 401);
+        }
 
-        // Requête vers l'API GitHub avec le token
+        $token = $session->get('github_token');
+
         $response = $httpClient->request('GET', 'https://api.github.com/user/repos', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $token,
+                'Authorization' => 'token ' . $token,
                 'Accept'        => 'application/vnd.github.v3+json',
+                'User-Agent'    => 'Symfony-App'
             ],
         ]);
 
-        $rawRepos = $response->toArray();
+        if (200 !== $response->getStatusCode()) {
+            return $this->json(['error' => 'Impossible de récupérer les dépôts GitHub'], 500);
+        }
 
-        $filteredRepos = array_map(function ($repo) {
-            return [
-                'name'        => $repo['name'],
-                'full_name'   => $repo['full_name'],
-                'html_url'    => $repo['html_url'],
-                'description' => $repo['description'],
-                'language'    => $repo['language'],
-                'forks_count' => $repo['forks_count'],
-                'stargazers_count' => $repo['stargazers_count'],
-                'watchers_count'   => $repo['watchers_count'],
-                'created_at'  => $repo['created_at'],
-                'updated_at'  => $repo['updated_at'],
-                'private'     => $repo['private'],
-            ];
-        }, $rawRepos);
+        $repos = $response->toArray();
+
+        $filtered = array_map(fn($repo) => [
+            'name' => $repo['name'],
+            'full_name' => $repo['full_name'],
+            'html_url' => $repo['html_url'],
+            'description' => $repo['description'],
+            'language' => $repo['language'],
+            'private' => $repo['private'],
+            'created_at' => $repo['created_at'],
+            'updated_at' => $repo['updated_at'],
+            'stargazers_count' => $repo['stargazers_count'],
+            'watchers_count' => $repo['watchers_count'],
+            'forks_count' => $repo['forks_count'],
+        ], $repos);
 
         return $this->json([
-            'username' => $githubUsername,
-            'repositories' => $filteredRepos,
+            'repositories' => $filtered
         ]);
+    }
+
+    #[Route('/api/github/deconnexion', name: 'connect_github_logout', methods: ['POST'])]
+    public function logout(SessionInterface $session): Response
+    {
+        // Vide les infos GitHub stockées en session
+        $session->remove('github_token');
+        $session->remove('github_username');
+
+        return $this->json(['message' => 'Déconnexion réussie']);
     }
 }
