@@ -19,7 +19,7 @@ function Login() {
     try {
       if (activeTab === 'login') {
         const data = await connexion(username, password);
-        console.log('Connecté!', data);
+        window.location.href = '/dashboard';
       } else {
         const data = await creerCompte(username, password);
         console.log('Compte créé!', data);
