@@ -1,8 +1,45 @@
+.container-composant-liste-projets{
+  padding: 1%;
+}
+.card-header-projet{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.card-vues-projet{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+
+.btn-refresh-liste-projets{
+  cursor: pointer;
+}
+
+.rotate {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.container-header-liste-projets{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .cards-projets-container{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(55vh, 1fr));
     gap: 1rem;
     padding: 1rem;
+    max-height: 80vh;
+    overflow: auto;
 }
 .card-projet{
     background-color: #3a3f47;
