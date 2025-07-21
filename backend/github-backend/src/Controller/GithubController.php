@@ -11,13 +11,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Psr\Log\LoggerInterface;
 
 class GithubController extends AbstractController
 {
     #[Route('/api/connect/github', name: 'connect_github')]
     public function connect(ClientRegistry $clientRegistry): Response
     {
-        // Redirige vers GitHub pour autorisation OAuth avec les bons scopes
         return $clientRegistry->getClient('github')->redirect(
             ['user', 'repo'], // Scopes
             []
@@ -33,14 +36,10 @@ class GithubController extends AbstractController
         $client = $clientRegistry->getClient('github');
 
         try {
-            // Récupère le token d’accès via le code OAuth
             $accessToken = $client->getAccessToken();
-
-            // Récupère l’utilisateur GitHub
             /** @var GithubResourceOwner $user */
             $user = $client->fetchUserFromToken($accessToken);
 
-            // Stocke le token GitHub en session
             $session->set('github_token', $accessToken->getToken());
             $session->set('github_username', $user->getNickname());
 
@@ -50,16 +49,49 @@ class GithubController extends AbstractController
         }
     }
 
-    #[Route('/api/github/repos', name: 'api_github_repos', methods: ['GET'])]
-    public function getRepositories(HttpClientInterface $httpClient, SessionInterface $session): Response
-    {
+
+    #[Route('/api/github/repos', name: 'api_github_repos', methods: ['POST'])]
+    public function getRepositories(
+        Request $request,
+        HttpClientInterface $httpClient,
+        SessionInterface $session,
+        CacheInterface $cache,
+        LoggerInterface $logger
+    ): JsonResponse {
         if (!$session->has('github_token')) {
             return $this->json(['error' => 'Utilisateur non connecté à GitHub'], 401);
         }
 
         $token = $session->get('github_token');
+        $body = json_decode($request->getContent(), true);
+        $forceRefresh = $body['force_refresh'] ?? false;
 
-        $response = $httpClient->request('GET', 'https://api.github.com/user/repos', [
+        $cacheKey = 'github_repos_' . sha1($token);
+
+        if (!$forceRefresh) {
+            $data = $cache->get($cacheKey, function (ItemInterface $item) use ($httpClient, $token) {
+                $item->expiresAfter(3600);
+                return $this->fetchGithubData($httpClient, $token);
+            });
+
+            return $this->json($data);
+        }
+
+        $data = $this->fetchGithubData($httpClient, $token);
+        $cache->delete($cacheKey);
+        $cache->get($cacheKey, function (ItemInterface $item) use ($data) {
+            $item->expiresAfter(3600);
+            return $data;
+        });
+
+        return $this->json($data);
+    }
+
+
+    private function fetchGithubData(HttpClientInterface $httpClient, string $token): array
+    {
+        
+        $repoResponse = $httpClient->request('GET', 'https://api.github.com/user/repos', [
             'headers' => [
                 'Authorization' => 'token ' . $token,
                 'Accept'        => 'application/vnd.github.v3+json',
@@ -67,35 +99,94 @@ class GithubController extends AbstractController
             ],
         ]);
 
-        if (200 !== $response->getStatusCode()) {
-            return $this->json(['error' => 'Impossible de récupérer les dépôts GitHub'], 500);
+        if (200 !== $repoResponse->getStatusCode()) {
+            return ['error' => 'Impossible de récupérer les dépôts GitHub'];
         }
 
-        $repos = $response->toArray();
+        $repos = $repoResponse->toArray();
+        $results = [];
+        $promises = [];
 
-        $filtered = array_map(fn($repo) => [
-            'name' => $repo['name'],
-            'full_name' => $repo['full_name'],
-            'html_url' => $repo['html_url'],
-            'description' => $repo['description'],
-            'language' => $repo['language'],
-            'private' => $repo['private'],
-            'created_at' => $repo['created_at'],
-            'updated_at' => $repo['updated_at'],
-            'stargazers_count' => $repo['stargazers_count'],
-            'watchers_count' => $repo['watchers_count'],
-            'forks_count' => $repo['forks_count'],
-        ], $repos);
+        foreach ($repos as $repo) {
+            $owner = $repo['owner']['login'];
+            $name = $repo['name'];
 
-        return $this->json([
-            'repositories' => $filtered
-        ]);
+            $viewsKey = "{$owner}/{$name}_views";
+            $clonesKey = "{$owner}/{$name}_clones";
+
+            $promises[$viewsKey] = $httpClient->request('GET', "https://api.github.com/repos/{$owner}/{$name}/traffic/views", [
+                'headers' => [
+                    'Authorization' => 'token ' . $token,
+                    'Accept'        => 'application/vnd.github.v3+json',
+                    'User-Agent'    => 'Symfony-App'
+                ],
+            ]);
+
+            $promises[$clonesKey] = $httpClient->request('GET', "https://api.github.com/repos/{$owner}/{$name}/traffic/clones", [
+                'headers' => [
+                    'Authorization' => 'token ' . $token,
+                    'Accept'        => 'application/vnd.github.v3+json',
+                    'User-Agent'    => 'Symfony-App'
+                ],
+            ]);
+        }
+
+        foreach ($repos as $repo) {
+            $owner = $repo['owner']['login'];
+            $name = $repo['name'];
+
+            $viewsKey = "{$owner}/{$name}_views";
+            $clonesKey = "{$owner}/{$name}_clones";
+
+            $views = null;
+            $clones = null;
+
+            try {
+                $viewsResponse = $promises[$viewsKey];
+                if ($viewsResponse->getStatusCode() === 200) {
+                    $views = $viewsResponse->toArray();
+                }
+            } catch (\Throwable $e) {}
+
+            try {
+                $clonesResponse = $promises[$clonesKey];
+                if ($clonesResponse->getStatusCode() === 200) {
+                    $clones = $clonesResponse->toArray();
+                }
+            } catch (\Throwable $e) {}
+
+            
+            $results[] = [
+                'name' => $name,
+                'owner' => $owner,
+                'full_name' => $repo['full_name'],
+                'html_url' => $repo['html_url'],
+                'description' => $repo['description'],
+                'language' => $repo['language'],
+                'private' => $repo['private'],
+                'created_at' => $repo['created_at'],
+                'updated_at' => $repo['updated_at'],
+                'stargazers_count' => $repo['stargazers_count'],
+                'watchers_count' => $repo['watchers_count'],
+                'forks_count' => $repo['forks_count'],
+                'views' => $views,
+                'clones' => $clones,
+            ];
+        }
+
+        // Trier les projets par projet récent
+        usort($results, function ($a, $b) {
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']);
+        });
+                
+        return [
+            'repositories' => $results
+        ];
     }
 
     #[Route('/api/github/deconnexion', name: 'connect_github_logout', methods: ['POST'])]
-    public function logout(SessionInterface $session): Response
+    public function logout(SessionInterface $session): JsonResponse
     {
-        // Vide les infos GitHub stockées en session
         $session->remove('github_token');
         $session->remove('github_username');
 

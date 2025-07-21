@@ -1,13 +1,17 @@
 const API_BASE_URL = 'http://localhost:8000/api';
 
+export async function recupererProjets(forceRefresh = false) {
 
-export async function recupererProjets() {
+  console.log('forceRefresh',forceRefresh)
   const response = await fetch(`${API_BASE_URL}/github/repos`, {
-    method: 'GET',
+    method: 'POST',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({
+      force_refresh: forceRefresh
+    }),
   });
 
   if (!response.ok) {

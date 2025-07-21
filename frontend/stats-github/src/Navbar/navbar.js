@@ -73,7 +73,7 @@ function Navbar() {
                   isActive ? 'navbar-item actif' : 'navbar-item'
                 }
               >
-                Projets
+                Liste des projets
               </NavLink>
             </li>
             <li>
