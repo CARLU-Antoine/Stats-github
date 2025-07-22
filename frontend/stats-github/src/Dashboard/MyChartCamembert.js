@@ -2,7 +2,7 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-function MyChartCamembert() {
+function MyChartCamembert({data}) {
   const options = {
     chart: {
       type: 'pie',
@@ -40,11 +40,7 @@ function MyChartCamembert() {
       {
         name: 'Vues',
         colorByPoint: true,
-        data: [
-          { name: 'Projet 1', y: 150 },
-          { name: 'Projet 2', y: 100 },
-          { name: 'Projet 3', y: 75 },
-        ],
+        data: data,
       },
     ],
     legend: {
