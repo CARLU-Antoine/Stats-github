@@ -1,0 +1,24 @@
+.container-filtrer-projet{
+    padding: 2%;
+    width: 100%;
+    height: 50vh;
+}
+
+.container-filtres{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-filtrer-projet{
+  padding: 10px;
+  background: #61dafb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
