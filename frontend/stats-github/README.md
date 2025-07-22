@@ -1,56 +1,72 @@
-# Stats-Github
+# Getting Started with Create React App
 
-Une application web moderne construite avec **React.js** (frontend) et **Symfony** (backend) permettant à n'importe quel utilisateur de visualiser les **statistiques de ses dépôts GitHub** : nombre de **vues**, de **clones**, et bien plus encore, le tout affiché avec des **graphiques interactifs** via la librairie **Highcharts.js**.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
----
+## Available Scripts
 
-## ✨ Fonctionnalités
+In the project directory, you can run:
 
-- 🔐 **Connexion sécurisée via token GitHub personnel**
-- 📊 Visualisation :
-  - Statistiques de **vues** (nombre total, uniques, historiques)
-  - Statistiques de **clones** (nombre total, uniques, historiques)
-- 📁 Liste de tous vos dépôts GitHub (publics et privés)
-- 🔄 Données affichées **du plus récent au plus ancien dépôt**
-- 📈 Graphiques dynamiques et responsives avec **Highcharts**
-- ⚡ Interface fluide avec React.js (hooks & composants modernes)
+### `npm start`
 
----
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-## 🔧 Technologies utilisées
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-### Frontend
-- [React.js](https://reactjs.org/)
-- [Axios](https://axios-http.com/) pour les requêtes API
-- [Highcharts.js](https://www.highcharts.com/) pour les visualisations
-- CSS
+### `npm test`
 
-### Backend
-- [Symfony 6](https://symfony.com/)
-- [HttpClient](https://symfony.com/doc/current/http_client.html) pour l'accès à l'API GitHub
-- Création des endpoints
-- Sécurité via **token GitHub** stocké temporairement côté backend
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
----
+### `npm run build`
 
-## 🚀 Lancement du projet
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### Prérequis
-- PHP 8.1+
-- Node.js 18+
-- Composer
-- GitHub personal access token (avec permissions `repo` et `read:traffic`)
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-### 🔙 Backend (Symfony)
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-```bash
-cd backend/
-composer install
-php bin/console server:run
+### `npm run eject`
 
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-🔜 Frontend (React)
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-cd frontend/
-npm install
-npm run dev
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Stats-github
+# Stats-github
