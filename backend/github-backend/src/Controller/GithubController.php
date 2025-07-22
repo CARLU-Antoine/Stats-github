@@ -43,7 +43,7 @@ class GithubController extends AbstractController
             $session->set('github_token', $accessToken->getToken());
             $session->set('github_username', $user->getNickname());
 
-            return $this->redirect('http://localhost:3000/github-success');
+            return $this->redirect('http://localhost:3000/liste-projets');
         } catch (InvalidStateException|\Exception $e) {
             return $this->redirectToRoute('connect_github');
         }
@@ -90,7 +90,6 @@ class GithubController extends AbstractController
 
     private function fetchGithubData(HttpClientInterface $httpClient, string $token): array
     {
-        
         $repoResponse = $httpClient->request('GET', 'https://api.github.com/user/repos', [
             'headers' => [
                 'Authorization' => 'token ' . $token,
@@ -140,11 +139,22 @@ class GithubController extends AbstractController
 
             $views = null;
             $clones = null;
+            $view_stat = [];
+            $clone_stat = [];
 
             try {
                 $viewsResponse = $promises[$viewsKey];
                 if ($viewsResponse->getStatusCode() === 200) {
                     $views = $viewsResponse->toArray();
+
+                    // Extraire les vues par date
+                    foreach ($views['views'] ?? [] as $view) {
+                        $view_stat[] = [
+                            'timestamp' => $view['timestamp'],
+                            'count' => $view['count'],
+                            'uniques' => $view['uniques'],
+                        ];
+                    }
                 }
             } catch (\Throwable $e) {}
 
@@ -152,10 +162,18 @@ class GithubController extends AbstractController
                 $clonesResponse = $promises[$clonesKey];
                 if ($clonesResponse->getStatusCode() === 200) {
                     $clones = $clonesResponse->toArray();
+
+                    // Extraire les clones par date
+                    foreach ($clones['clones'] ?? [] as $clone) {
+                        $clone_stat[] = [
+                            'timestamp' => $clone['timestamp'],
+                            'count' => $clone['count'],
+                            'uniques' => $clone['uniques'],
+                        ];
+                    }
                 }
             } catch (\Throwable $e) {}
 
-            
             $results[] = [
                 'name' => $name,
                 'owner' => $owner,
@@ -171,18 +189,20 @@ class GithubController extends AbstractController
                 'forks_count' => $repo['forks_count'],
                 'views' => $views,
                 'clones' => $clones,
+                'view_stat' => $view_stat,
+                'clone_stat' => $clone_stat,
             ];
         }
 
-        // Trier les projets par projet récent
         usort($results, function ($a, $b) {
             return strtotime($b['created_at']) <=> strtotime($a['created_at']);
         });
-                
+
         return [
             'repositories' => $results
         ];
     }
+
 
     #[Route('/api/github/deconnexion', name: 'connect_github_logout', methods: ['POST'])]
     public function logout(SessionInterface $session): JsonResponse

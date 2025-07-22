@@ -2,7 +2,7 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-function MyChartBar() {
+function MyChartBar({ tableauLabelProjet, tableauQuantiteVues, tableauQuantiteClones }) {
   const options = {
     title: {
       text: 'Statistiques GitHub',
@@ -16,7 +16,7 @@ function MyChartBar() {
       backgroundColor: 'transparent',
     },
     xAxis: {
-      categories: ['Projet 1', 'Projet 2', 'Projet 3'],
+      categories: tableauLabelProjet,
       labels: {
         style: {
           color: '#FFFFFF'
@@ -44,11 +44,11 @@ function MyChartBar() {
     series: [
       {
         name: 'Vues',
-        data: [150, 100, 75],
+        data: tableauQuantiteVues,
       },
       {
         name: 'Clones',
-        data: [50, 40, 20],
+        data: tableauQuantiteClones,
       },
     ],
     responsive: {
@@ -75,7 +75,7 @@ function MyChartBar() {
       <HighchartsReact
         highcharts={Highcharts}
         options={options}
-        containerProps={{ style: { width: '100%', height: '100%' } }}
+        containerProps={{ style: { width: '100%', height: '1OO%' } }}
       />
     </div>
   );
