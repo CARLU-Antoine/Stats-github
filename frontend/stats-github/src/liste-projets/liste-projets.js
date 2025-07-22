@@ -25,8 +25,6 @@ function ListeProjets() {
     try {
       const data = await recupererProjets(etatRefresh);
 
-      console.log('data',data.repositories)
-      
       setProjets(data.repositories || []);
     } catch (err) {
       setErreur(err.message || 'Erreur inconnue');
@@ -45,7 +43,7 @@ function ListeProjets() {
   return (
     <div className='container-composant-liste-projets'>
       <div className='container-header-liste-projets'>
-        <h1>Liste des projets GitHub</h1>
+        <h1>{Object.keys(projets).length} projets</h1>
         <svg
           className={`btn-refresh-liste-projets ${isRotating ? 'rotate' : ''}`}
           onClick={handleClick}
@@ -58,7 +56,7 @@ function ListeProjets() {
       </div>
 
       <div className='cards-projets-container'>
-        {projets.map(projet => (
+        {Object.entries(projets).map(([fullName, projet]) => (
           <div className='card-projet' key={projet.id || projet.name}>
             <div className='card-header-projet'>
                 <h4>{projet.name} créé par {projet.owner}</h4>

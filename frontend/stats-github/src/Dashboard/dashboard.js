@@ -5,7 +5,6 @@ import MyChartBar from './MyChartBar';
 import MyChartCamembert from './MyChartCamembert';
 
 function Dashboard() {
-  const [projets, setProjets] = useState([]);
   const [erreur, setErreur] = useState(null);
   const [chargement, setChargement] = useState(true);
 
@@ -21,52 +20,45 @@ function Dashboard() {
   const [tableauTop3Vues, setTableauTop3Vues] = useState([]);
   const [tableauTop3Clones, setTableauTop3Clones] = useState([]);
 
-
   async function chargerProjets(etatRefresh) {
     try {
       const data = await recupererProjets(etatRefresh);
+
+      const projets = Object.values(data.repositories || {});
 
       let totalVues = 0;
       let totalUniques = 0;
       let totalClones = 0;
       let totalClonesUniques = 0;
-      let tableauLabelProjet=[];
-      let tableauQuantiteVues=[];
-      let tableauQuantiteClones=[];
-      let tableautop3Vues=[];
-      let tableauTop3Clones=[];
+      let labels = [];
+      let vues = [];
+      let clones = [];
 
-      for (const projetCourant of data.repositories) {
-        if (projetCourant.views) {
-          totalVues += projetCourant.views.count ?? 0;
-          totalUniques += projetCourant.views.uniques ?? 0;
-        }
+      projets.forEach(projet => {
+        const vuesProjet = projet.views?.uniques ?? 0;
+        const clonesProjet = projet.clones?.uniques ?? 0;
 
-        if (projetCourant.clones) {
-          totalClones += projetCourant.clones.count ?? 0;
-          totalClonesUniques += projetCourant.clones.uniques ?? 0;
-        }
+        totalVues += projet.views?.count ?? 0;
+        totalUniques += vuesProjet;
+        totalClones += projet.clones?.count ?? 0;
+        totalClonesUniques += clonesProjet;
 
-        tableauLabelProjet.push(projetCourant.name);
-        tableauQuantiteVues.push(projetCourant.views.uniques ?? 0);
-        tableauQuantiteClones.push(projetCourant.clones.uniques ?? 0);
+        labels.push(projet.name);
+        vues.push(vuesProjet);
+        clones.push(clonesProjet);
+      });
 
-
-        tableautop3Vues.push({ name: projetCourant.name, y: projetCourant.views.uniques ?? 0});
-        tableauTop3Clones.push({ name: projetCourant.name, y: projetCourant.clones.uniques ?? 0});
-      }
-      
       setNbvues(totalVues);
       setNbUniqueVisiteurs(totalUniques);
       setNbGitClones(totalClones);
       setNbGitCloneUnique(totalClonesUniques);
 
-      setTableauLabelProjet(tableauLabelProjet);
-      setTableauQuantiteVues(tableauQuantiteVues);
-      setTableauQuantiteClones(tableauQuantiteClones);
+      setTableauLabelProjet(labels);
+      setTableauQuantiteVues(vues);
+      setTableauQuantiteClones(clones);
 
-      // Trier par vues uniques décroissantes
-      const top3Vues = [...data.repositories]
+      // Top 3 vues
+      const top3Vues = projets
         .sort((a, b) => (b.views?.uniques ?? 0) - (a.views?.uniques ?? 0))
         .slice(0, 3)
         .map(projet => ({
@@ -74,8 +66,8 @@ function Dashboard() {
           y: projet.views?.uniques ?? 0
         }));
 
-      // Trier par clones uniques décroissants
-      const top3Clones = [...data.repositories]
+      // Top 3 clones
+      const top3Clones = projets
         .sort((a, b) => (b.clones?.uniques ?? 0) - (a.clones?.uniques ?? 0))
         .slice(0, 3)
         .map(projet => ({
@@ -85,9 +77,7 @@ function Dashboard() {
 
       setTableauTop3Vues(top3Vues);
       setTableauTop3Clones(top3Clones);
-                
 
-      setProjets(data.repositories || []);
     } catch (err) {
       setErreur(err.message || 'Erreur inconnue');
     } finally {
@@ -98,6 +88,9 @@ function Dashboard() {
   useEffect(() => {
     chargerProjets(false);
   }, []);
+
+  if (chargement) return <p>Chargement...</p>;
+  if (erreur) return <p>Erreur : {erreur}</p>;
 
   return (
     <div className="dashboard">
@@ -131,11 +124,11 @@ function Dashboard() {
         <div className='dashboard-component'>
           <h1>Statistiques en barre des projets GitHub</h1>
           <div className='dashboard-bar'>
-              <MyChartBar
-                tableauLabelProjet={tableauLabelProjet}
-                tableauQuantiteVues={tableauQuantiteVues}
-                tableauQuantiteClones={tableauQuantiteClones}
-              />
+            <MyChartBar
+              tableauLabelProjet={tableauLabelProjet}
+              tableauQuantiteVues={tableauQuantiteVues}
+              tableauQuantiteClones={tableauQuantiteClones}
+            />
           </div>
         </div>
       </div>
@@ -144,18 +137,14 @@ function Dashboard() {
         <div className='dashboard-component'>
           <h1>Top 3 des projets GitHub les plus visités</h1>
           <div className='dashboard-camembert'>
-            <MyChartCamembert
-            data={tableauTop3Vues} 
-            />
+            <MyChartCamembert data={tableauTop3Vues} />
           </div>
         </div>
 
         <div className='dashboard-component'>
           <h1>Top 3 des projets GitHub les plus clonés</h1>
           <div className='dashboard-camembert'>
-            <MyChartCamembert
-            data={tableauTop3Clones}
-            />
+            <MyChartCamembert data={tableauTop3Clones} />
           </div>
         </div>
       </div>

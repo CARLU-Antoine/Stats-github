@@ -88,7 +88,7 @@ function Navbar() {
             </li>
             <li>
               <NavLink
-                to="/filtrer-projets"
+                to="/filtrer-projet"
                 className={({ isActive }) =>
                   isActive ? 'navbar-item actif' : 'navbar-item'
                 }

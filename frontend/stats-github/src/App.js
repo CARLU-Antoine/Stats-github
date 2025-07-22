@@ -1,9 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
 
 import Navbar from './Navbar/navbar';
+import Login from './Login/login';
 import ListeProjets from './liste-projets/liste-projets';
 import Dashboard from './Dashboard/dashboard';
-import Login from './Login/login';
+import FiltrerProjet from './filtrer-projet/fitrer-projet';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/liste-projets" element={<ListeProjets />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/filtrer-projet" element={<FiltrerProjet />} />
         </Routes>
       </main>
     </>

@@ -103,15 +103,21 @@ class GithubController extends AbstractController
         }
 
         $repos = $repoResponse->toArray();
+        usort($repos, function ($a, $b) {
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']);
+        });
+
         $results = [];
         $promises = [];
 
+        // Requête des vues et clones pour chaque repo
         foreach ($repos as $repo) {
             $owner = $repo['owner']['login'];
             $name = $repo['name'];
+            $fullName = $repo['full_name'];
 
-            $viewsKey = "{$owner}/{$name}_views";
-            $clonesKey = "{$owner}/{$name}_clones";
+            $viewsKey = "{$fullName}_views";
+            $clonesKey = "{$fullName}_clones";
 
             $promises[$viewsKey] = $httpClient->request('GET', "https://api.github.com/repos/{$owner}/{$name}/traffic/views", [
                 'headers' => [
@@ -130,12 +136,14 @@ class GithubController extends AbstractController
             ]);
         }
 
+        // Traitement des résultats
         foreach ($repos as $repo) {
             $owner = $repo['owner']['login'];
             $name = $repo['name'];
+            $fullName = $repo['full_name'];
 
-            $viewsKey = "{$owner}/{$name}_views";
-            $clonesKey = "{$owner}/{$name}_clones";
+            $viewsKey = "{$fullName}_views";
+            $clonesKey = "{$fullName}_clones";
 
             $views = null;
             $clones = null;
@@ -146,8 +154,6 @@ class GithubController extends AbstractController
                 $viewsResponse = $promises[$viewsKey];
                 if ($viewsResponse->getStatusCode() === 200) {
                     $views = $viewsResponse->toArray();
-
-                    // Extraire les vues par date
                     foreach ($views['views'] ?? [] as $view) {
                         $view_stat[] = [
                             'timestamp' => $view['timestamp'],
@@ -162,8 +168,6 @@ class GithubController extends AbstractController
                 $clonesResponse = $promises[$clonesKey];
                 if ($clonesResponse->getStatusCode() === 200) {
                     $clones = $clonesResponse->toArray();
-
-                    // Extraire les clones par date
                     foreach ($clones['clones'] ?? [] as $clone) {
                         $clone_stat[] = [
                             'timestamp' => $clone['timestamp'],
@@ -174,10 +178,10 @@ class GithubController extends AbstractController
                 }
             } catch (\Throwable $e) {}
 
-            $results[] = [
+            $results[$fullName] = [
                 'name' => $name,
                 'owner' => $owner,
-                'full_name' => $repo['full_name'],
+                'full_name' => $fullName,
                 'html_url' => $repo['html_url'],
                 'description' => $repo['description'],
                 'language' => $repo['language'],
@@ -194,14 +198,11 @@ class GithubController extends AbstractController
             ];
         }
 
-        usort($results, function ($a, $b) {
-            return strtotime($b['created_at']) <=> strtotime($a['created_at']);
-        });
-
         return [
             'repositories' => $results
         ];
     }
+
 
 
     #[Route('/api/github/deconnexion', name: 'connect_github_logout', methods: ['POST'])]
