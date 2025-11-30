@@ -1,5 +1,19 @@
 # Stats-Github
 
+### Page de connexion
+
+<img width="3024" height="1722" alt="image" src="https://github.com/user-attachments/assets/bdf77bc1-2f73-47ea-b845-be58f656655c" />
+
+### Liste des projets
+<img width="3024" height="1714" alt="image" src="https://github.com/user-attachments/assets/cec67833-125a-4bc0-9fa6-0d36603ac1d2" />
+
+### Dashboard
+<img width="3024" height="1728" alt="image" src="https://github.com/user-attachments/assets/320eda67-42b9-41ef-93c6-920b6d3b4228" />
+
+### Filtrer les projets grâce à une lineChart
+<img width="3024" height="1724" alt="image" src="https://github.com/user-attachments/assets/c1d9d85a-050d-4b20-b507-00b70249b4fc" />
+
+
 Une application web moderne construite avec **React.js** (frontend) et **Symfony** (backend) permettant à n'importe quel utilisateur de visualiser les **statistiques de ses dépôts GitHub** : nombre de **vues**, de **clones**, et bien plus encore, le tout affiché avec des **graphiques interactifs** via la librairie **Highcharts.js**.
 
 ---
