@@ -32,7 +32,7 @@ function MyLineChart({ data }) {
     chart: {
       type: 'line',
       backgroundColor: 'transparent',
-      height: 300,
+      height: 500,
     },
     title: {
       text: 'Évolution des vues et clones par projet',

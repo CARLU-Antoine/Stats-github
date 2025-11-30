@@ -137,14 +137,14 @@ function Dashboard() {
         <div className='dashboard-component'>
           <h1>Top 3 des projets GitHub les plus visités</h1>
           <div className='dashboard-camembert'>
-            <MyChartCamembert data={tableauTop3Vues} />
+            <MyChartCamembert titre='Top 3 des projets GitHub (Vues)' typeDonnees="vues" data={tableauTop3Vues} />
           </div>
         </div>
 
         <div className='dashboard-component'>
           <h1>Top 3 des projets GitHub les plus clonés</h1>
           <div className='dashboard-camembert'>
-            <MyChartCamembert data={tableauTop3Clones} />
+            <MyChartCamembert titre='Top 3 des projets GitHub (Clones)'typeDonnees="clones" data={tableauTop3Clones} />
           </div>
         </div>
       </div>
