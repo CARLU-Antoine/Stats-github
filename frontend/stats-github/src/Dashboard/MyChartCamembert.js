@@ -2,7 +2,7 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-function MyChartCamembert({data}) {
+function MyChartCamembert({titre,typeDonnees,data}) {
   const options = {
     chart: {
       type: 'pie',
@@ -10,13 +10,13 @@ function MyChartCamembert({data}) {
       height: 250,
     },
     title: {
-      text: 'Top 3 des projets GitHub (Vues)',
+      text: titre,
       style: {
         color: '#FFFFFF',
       },
     },
     tooltip: {
-      pointFormat: '{series.name}: <b>{point.y}</b> vues',
+      pointFormat: '{series.name}: <b>{point.y}</b> ' + typeDonnees,
     },
     accessibility: {
       point: {
